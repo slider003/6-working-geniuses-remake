@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The 6 Working Geniuses Assessment</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f8fafc;
+        }
+        #root {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        const WorkingGeniusesQuiz = () => {
+          const [currentQuestion, setCurrentQuestion] = useState(0);
+          const [answers, setAnswers] = useState({});
+          const [showResults, setShowResults] = useState(false);
+          const resultsRef = useRef(null);
+
+          const questions = [
+            { id: 1, text: "I have extremely high standards of precision and quality.", category: "TENACITY" },
+            { id: 2, text: "I have a gift for rallying people around a plan or idea, and inspiring them to take action.", category: "GALVANIZING" },
+            { id: 3, text: "I am comfortable sitting and contemplating the meaning of things longer than most others are.", category: "WONDER" },
+            { id: 4, text: "I can't help but come up with new and original ideas, even when it's not necessary.", category: "INVENTION" },
+            { id: 5, text: "I get more satisfaction and fulfillment than most people from seeing a project through to its finish.", category: "TENACITY" },
+            { id: 6, text: "People who know me would say I naturally respond to the needs of others, and on their terms.", category: "ENABLEMENT" },
+            { id: 7, text: "Others say I have a knack for convincing people to get involved in and support projects and ideas.", category: "GALVANIZING" },
+            { id: 8, text: "People say I can't stop innovating or proposing new ideas.", category: "INVENTION" },
+            { id: 9, text: "I am much more capable than most people in using my gut instincts when there is little data or information available.", category: "DISCERNMENT" },
+            { id: 10, text: "I am particularly bothered by seeing unmet potential in people or in my environment.", category: "ENABLEMENT" },
+            { id: 11, text: "Compared to others, I want the tasks that I work on to have clearly defined standards and outcomes.", category: "TENACITY" },
+            { id: 12, text: "I find helping people to be more deeply fulfilling than others do.", category: "ENABLEMENT" },
+            { id: 13, text: "I often start thinking about my next new idea before my last one has been fully developed.", category: "INVENTION" },
+            { id: 14, text: "People say that I have a rare talent for providing uniquely insightful advice and perspective.", category: "DISCERNMENT" },
+            { id: 15, text: "I can't help but prod and convince others to do something that I believe in or enjoy.", category: "GALVANIZING" },
+            { id: 16, text: "Others would say I am relentless in my attention to detail and completion of goals.", category: "TENACITY" },
+            { id: 17, text: "I spend more time than most people reflecting on and contemplating problems in the world around me.", category: "WONDER" },
+            { id: 18, text: "Others would say I have inexplicably better instincts and intuition than most people.", category: "DISCERNMENT" },
+            { id: 19, text: "I get energy when I have to create something new out of nothing.", category: "INVENTION" },
+            { id: 20, text: "Compared to most others, I am an exceedingly responsive and helpful person.", category: "ENABLEMENT" },
+            { id: 21, text: "Others would say I quickly and enthusiastically rally people around new ideas.", category: "GALVANIZING" },
+            { id: 22, text: "I rarely miss a deadline or target and couldn't imagine letting it happen.", category: "TENACITY" },
+            { id: 23, text: "I have a unique and undeniable ability to identify the underlying essence of any situation or challenge.", category: "DISCERNMENT" },
+            { id: 24, text: "I can't help but contemplate opportunities longer than most others would.", category: "WONDER" },
+            { id: 25, text: "Service and hospitality are a big part of my identity.", category: "ENABLEMENT" },
+            { id: 26, text: "Others consider me to be an extremely innovative person.", category: "INVENTION" },
+            { id: 27, text: "More than most people, I really enjoy getting others excited about a new idea or possibility.", category: "GALVANIZING" },
+            { id: 28, text: "I am extremely gifted at seeing how emotional factors must be integrated into decisions and situations.", category: "DISCERNMENT" },
+            { id: 29, text: "I can't help but empathize with people and support them in whatever they need.", category: "ENABLEMENT" },
+            { id: 30, text: "I enjoy having the freedom to create something new rather than having to tweak or edit something that has already been created.", category: "INVENTION" },
+            { id: 31, text: "People who know me well would say that I often get lost in my own thoughts.", category: "WONDER" },
+            { id: 32, text: "Compared to most people, I really enjoy driving a project or task through to final completion.", category: "TENACITY" },
+            { id: 33, text: "Compared to most others, I'm good at recruiting people to get involved and pushing them to start moving.", category: "GALVANIZING" },
+            { id: 34, text: "People say that I have an uncanny ability to assess or evaluate an idea, even without extensive detail or information.", category: "DISCERNMENT" },
+            { id: 35, text: "I find myself asking why things are the way they are more than most others do.", category: "WONDER" },
+            { id: 36, text: "I feel like I am the first person that people ask to volunteer because they know I will almost always say yes.", category: "ENABLEMENT" },
+            { id: 37, text: "Being an original and creative thinker is a big part of my identity.", category: "INVENTION" },
+            { id: 38, text: "When momentum and progress slow down, I enjoy being the one to reenergize people to push forward.", category: "GALVANIZING" },
+            { id: 39, text: "I am uniquely gifted at recognizing subtle nuances, trends and patterns that most others miss.", category: "DISCERNMENT" },
+            { id: 40, text: "I get energy from having a list of specific tasks in front of me.", category: "TENACITY" },
+            { id: 41, text: "I can't help but get lost in pondering the bigger picture of things.", category: "WONDER" },
+            { id: 42, text: "I naturally and easily encourage others in whatever excites them.", category: "ENABLEMENT" }
+          ];
+
+          const answerOptions = [
+            { value: 0, text: "Oh no, definitely not" },
+            { value: 1, text: "Sometimes/somewhat" },
+            { value: 2, text: "Oh yeah, definitely" }
+          ];
+
+          const handleAnswer = (value) => {
+            setAnswers({ ...answers, [currentQuestion]: value });
+          };
+
+          const nextQuestion = () => {
+            if (currentQuestion < questions.length - 1) {
+              setCurrentQuestion(currentQuestion + 1);
+            } else {
+              calculateResults();
+            }
+          };
+
+          const prevQuestion = () => {
+            if (currentQuestion > 0) {
+              setCurrentQuestion(currentQuestion - 1);
+            }
+          };
+
+          const calculateResults = () => {
+            const scores = {
+              WONDER: 0,
+              INVENTION: 0,
+              DISCERNMENT: 0,
+              GALVANIZING: 0,
+              ENABLEMENT: 0,
+              TENACITY: 0
+            };
+
+            questions.forEach((question, index) => {
+              const answer = answers[index] || 0;
+              scores[question.category] += answer;
+            });
+
+            const maxPossibleScore = {
+              WONDER: 6 * 2,
+              INVENTION: 7 * 2,
+              DISCERNMENT: 7 * 2,
+              GALVANIZING: 7 * 2,
+              ENABLEMENT: 8 * 2,
+              TENACITY: 7 * 2
+            };
+
+            const percentages = Object.entries(scores).map(([category, score]) => ({
+              category,
+              score,
+              percentage: Math.round((score / maxPossibleScore[category]) * 100)
+            })).sort((a, b) => b.percentage - a.percentage);
+
+            setShowResults({ scores, percentages });
+          };
+
+          const exportToPDF = () => {
+            const element = resultsRef.current;
+            if (!element) {
+              alert('Results not found. Please try again.');
+              return;
+            }
+
+            try {
+              const printContent = element.innerHTML;
+              const printWindow = window.open('', '_blank');
+              
+              if (!printWindow) {
+                alert('Please allow popups for this site to enable PDF export.');
+                return;
+              }
+              
+              printWindow.document.write(\`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <title>Working Geniuses Assessment Results</title>
+                    <style>
+                      body { 
+                        font-family: Arial, sans-serif; 
+                        margin: 20px; 
+                        color: #333;
+                        line-height: 1.6;
+                      }
+                      .bg-green-50 { background-color: #f0fdf4; padding: 24px; margin: 16px 0; border-left: 4px solid #22c55e; border-radius: 8px; }
+                      .bg-blue-50 { background-color: #eff6ff; padding: 24px; margin: 16px 0; border-left: 4px solid #3b82f6; border-radius: 8px; }
+                      .bg-gray-50 { background-color: #f9fafb; padding: 24px; margin: 16px 0; border-radius: 8px; }
+                      .bg-yellow-50 { background-color: #fefce8; padding: 24px; margin: 16px 0; border-left: 4px solid #eab308; border-radius: 8px; }
+                      .text-green-800 { color: #166534; }
+                      .text-blue-800 { color: #1e40af; }
+                      .text-gray-800 { color: #1f2937; }
+                      .text-yellow-800 { color: #92400e; }
+                      .font-bold { font-weight: bold; }
+                      .text-xl { font-size: 1.25rem; }
+                      .text-3xl { font-size: 1.875rem; }
+                      .text-center { text-align: center; }
+                      .no-print { display: none !important; }
+                      @media print {
+                        body { margin: 0; }
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    \${printContent}
+                    <p style="text-align: center; margin-top: 30px; color: #666;">
+                      Use Ctrl+P (or Cmd+P on Mac) to print or save as PDF
+                    </p>
+                  </body>
+                </html>
+              \`);
+              
+              printWindow.document.close();
+              
+              setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+              }, 500);
+              
+            } catch (error) {
+              console.error('PDF export failed:', error);
+              alert('PDF export failed. Please try again or check if popups are blocked.');
+            }
+          };
+
+          const exportToImage = async (format = 'png') => {
+            const element = resultsRef.current;
+            if (!element) {
+              alert('Results not found. Please try again.');
+              return;
+            }
+
+            try {
+              const textContent = \`WORKING GENIUSES ASSESSMENT RESULTS
+
+\${element.innerText}
+
+Generated on \${new Date().toLocaleDateString()}\`;
+              
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(textContent);
+                alert(\`✅ Results copied to clipboard!
+
+You can now paste this into any document and save as \${format.toUpperCase()}.
+
+Tip: For a visual export, take a screenshot of your results on screen.\`);
+              } else {
+                const textWindow = window.open('', '_blank');
+                if (!textWindow) {
+                  alert('Please allow popups to use the export feature.');
+                  return;
+                }
+                
+                textWindow.document.write(\`
+                  <html>
+                    <head><title>Working Geniuses Results - Copy This Text</title></head>
+                    <body style="font-family: Arial, sans-serif; padding: 20px;">
+                      <h2>Copy this text to save as \${format.toUpperCase()}:</h2>
+                      <textarea style="width: 100%; height: 400px; padding: 10px; font-family: monospace;" readonly>\${textContent}</textarea>
+                      <p><strong>Instructions:</strong></p>
+                      <ol>
+                        <li>Select all text above (Ctrl+A or Cmd+A)</li>
+                        <li>Copy (Ctrl+C or Cmd+C)</li>
+                        <li>Paste into any document editor</li>
+                        <li>Save in your preferred format</li>
+                      </ol>
+                      <p><em>For visual exports, take a screenshot of the results page.</em></p>
+                    </body>
+                  </html>
+                \`);
+                textWindow.document.close();
+              }
+            } catch (error) {
+              console.error('Export failed:', error);
+              alert(\`Export failed: \${error.message}
+
+Try taking a screenshot instead.\`);
+            }
+          };
+
+          const resetQuiz = () => {
+            setCurrentQuestion(0);
+            setAnswers({});
+            setShowResults(false);
+          };
+
+          const getCategoryDescription = (category) => {
+            const descriptions = {
+              WONDER: "You excel at pondering, questioning, and contemplating the bigger picture. You naturally ask 'why' and seek deeper meaning.",
+              INVENTION: "You're a natural creator and innovator, constantly generating new ideas and original solutions. You thrive on bringing something new into existence.",
+              DISCERNMENT: "You have exceptional intuition and judgment. You can quickly assess situations, recognize patterns, and provide insightful evaluation.",
+              GALVANIZING: "You're gifted at rallying and energizing others around ideas and initiatives. You naturally inspire people to take action.",
+              ENABLEMENT: "You excel at helping, supporting, and responding to others' needs. Service and empowering others energizes you.",
+              TENACITY: "You're driven to push projects through to completion with high standards. You thrive on finishing tasks and achieving goals."
+            };
+            return descriptions[category];
+          };
+
+          if (showResults) {
+            const topTwo = showResults.percentages.slice(0, 2);
+            const workingGeniuses = topTwo.filter(item => item.percentage >= 70);
+            const competencies = topTwo.filter(item => item.percentage >= 50 && item.percentage < 70);
+
+            return (
+              <div className="max-w-4xl mx-auto p-6 bg-white">
+                <div ref={resultsRef} className="results-content">
+                  <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2">Your Working Geniuses Results</h1>
+                    <p className="text-gray-600">Based on your responses, here's your unique working genius profile:</p>
+                  </div>
+
+                  <div className="space-y-6">
+                    {workingGeniuses.length > 0 && (
+                      <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+                        <h2 className="text-xl font-bold text-green-800 mb-3">🌟 Your Working Geniuses (70%+)</h2>
+                        {workingGeniuses.map(item => (
+                          <div key={item.category} className="mb-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <h3 className="font-semibold text-green-700">{item.category}</h3>
+                              <span className="text-green-600 font-bold">{item.percentage}%</span>
+                            </div>
+                            <p className="text-green-600 text-sm">{getCategoryDescription(item.category)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {competencies.length > 0 && (
+                      <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+                        <h2 className="text-xl font-bold text-blue-800 mb-3">💪 Your Working Competencies (50-69%)</h2>
+                        {competencies.map(item => (
+                          <div key={item.category} className="mb-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <h3 className="font-semibold text-blue-700">{item.category}</h3>
+                              <span className="text-blue-600 font-bold">{item.percentage}%</span>
+                            </div>
+                            <p className="text-blue-600 text-sm">{getCategoryDescription(item.category)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="bg-gray-50 p-6 rounded-lg">
+                      <h2 className="text-xl font-bold text-gray-800 mb-3">📊 Complete Results</h2>
+                      <div className="space-y-3">
+                        {showResults.percentages.map(item => (
+                          <div key={item.category} className="flex items-center">
+                            <div className="w-32 text-sm font-medium text-gray-700">{item.category}</div>
+                            <div className="flex-1 mx-4">
+                              <div className="w-full bg-gray-200 rounded-full h-4">
+                                <div 
+                                  className={\`h-4 rounded-full \${
+                                    item.percentage >= 70 ? 'bg-green-500' : 
+                                    item.percentage >= 50 ? 'bg-blue-500' : 'bg-gray-400'
+                                  }\`}
+                                  style={{ width: \`\${item.percentage}%\` }}
+                                ></div>
+                              </div>
+                            </div>
+                            <div className="w-12 text-sm font-bold text-gray-700">{item.percentage}%</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-500">
+                      <h2 className="text-xl font-bold text-yellow-800 mb-3">💡 Understanding Your Results</h2>
+                      <div className="text-yellow-700 space-y-2 text-sm">
+                        <p><strong>Working Geniuses (70%+):</strong> These are your natural strengths that energize you. You should spend most of your time in these areas.</p>
+                        <p><strong>Working Competencies (50-69%):</strong> You can do these well but they don't energize you as much. Use these to support your geniuses.</p>
+                        <p><strong>Working Frustrations (below 50%):</strong> These areas drain your energy. Try to minimize time spent here or partner with others who have these as geniuses.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-3 mt-8 no-print">
+                  <button 
+                    onClick={exportToPDF}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                  >
+                    📄 Export PDF
+                  </button>
+                  <button 
+                    onClick={() => exportToImage('png')}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                  >
+                    🖼️ Export PNG
+                  </button>
+                  <button 
+                    onClick={() => exportToImage('jpeg')}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                  >
+                    📸 Export JPEG
+                  </button>
+                  <button 
+                    onClick={resetQuiz}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    🔄 Take Quiz Again
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
+          const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+          return (
+            <div className="max-w-2xl mx-auto p-6 bg-white min-h-screen">
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h1 className="text-2xl font-bold text-gray-800">The 6 Working Geniuses Assessment</h1>
+                  <span className="text-sm text-gray-600">
+                    {currentQuestion + 1} of {questions.length}
+                  </span>
+                </div>
+                
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: \`\${progress}%\` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-6 rounded-lg mb-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                  {questions[currentQuestion].text}
+                </h2>
+                
+                <div className="space-y-3">
+                  {answerOptions.map((option) => (
+                    <label 
+                      key={option.value} 
+                      className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-white transition-colors"
+                    >
+                      <input
+                        type="radio"
+                        name="answer"
+                        value={option.value}
+                        checked={answers[currentQuestion] === option.value}
+                        onChange={() => handleAnswer(option.value)}
+                        className="mr-3"
+                      />
+                      <span className="text-gray-700">{option.text}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <button
+                  onClick={prevQuestion}
+                  disabled={currentQuestion === 0}
+                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                
+                <button
+                  onClick={nextQuestion}
+                  disabled={answers[currentQuestion] === undefined}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {currentQuestion === questions.length - 1 ? 'Get Results' : 'Next'}
+                </button>
+              </div>
+            </div>
+          );
+        };
+
+        ReactDOM.render(<WorkingGeniusesQuiz />, document.getElementById('root'));
+    </script>
+</body>
+</html>
