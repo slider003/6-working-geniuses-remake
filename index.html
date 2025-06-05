@@ -147,8 +147,8 @@
                 alert('Please allow popups for this site to enable PDF export.');
                 return;
               }
-              
-              printWindow.document.write(\`
+
+              const htmlContent = `
                 <!DOCTYPE html>
                 <html>
                   <head>
@@ -179,14 +179,15 @@
                     </style>
                   </head>
                   <body>
-                    \${printContent}
+                    ${printContent}
                     <p style="text-align: center; margin-top: 30px; color: #666;">
                       Use Ctrl+P (or Cmd+P on Mac) to print or save as PDF
                     </p>
                   </body>
                 </html>
-              \`);
+              `;
               
+              printWindow.document.write(htmlContent);
               printWindow.document.close();
               
               setTimeout(() => {
@@ -208,32 +209,32 @@
             }
 
             try {
-              const textContent = \`WORKING GENIUSES ASSESSMENT RESULTS
+              const textContent = `WORKING GENIUSES ASSESSMENT RESULTS
 
-\${element.innerText}
+${element.innerText}
 
-Generated on \${new Date().toLocaleDateString()}\`;
+Generated on ${new Date().toLocaleDateString()}`;
               
               if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(textContent);
-                alert(\`✅ Results copied to clipboard!
+                alert(`✅ Results copied to clipboard!
 
-You can now paste this into any document and save as \${format.toUpperCase()}.
+You can now paste this into any document and save as ${format.toUpperCase()}.
 
-Tip: For a visual export, take a screenshot of your results on screen.\`);
+Tip: For a visual export, take a screenshot of your results on screen.`);
               } else {
                 const textWindow = window.open('', '_blank');
                 if (!textWindow) {
                   alert('Please allow popups to use the export feature.');
                   return;
                 }
-                
-                textWindow.document.write(\`
+
+                const windowContent = `
                   <html>
                     <head><title>Working Geniuses Results - Copy This Text</title></head>
                     <body style="font-family: Arial, sans-serif; padding: 20px;">
-                      <h2>Copy this text to save as \${format.toUpperCase()}:</h2>
-                      <textarea style="width: 100%; height: 400px; padding: 10px; font-family: monospace;" readonly>\${textContent}</textarea>
+                      <h2>Copy this text to save as ${format.toUpperCase()}:</h2>
+                      <textarea style="width: 100%; height: 400px; padding: 10px; font-family: monospace;" readonly>${textContent}</textarea>
                       <p><strong>Instructions:</strong></p>
                       <ol>
                         <li>Select all text above (Ctrl+A or Cmd+A)</li>
@@ -244,14 +245,16 @@ Tip: For a visual export, take a screenshot of your results on screen.\`);
                       <p><em>For visual exports, take a screenshot of the results page.</em></p>
                     </body>
                   </html>
-                \`);
+                `;
+                
+                textWindow.document.write(windowContent);
                 textWindow.document.close();
               }
             } catch (error) {
               console.error('Export failed:', error);
-              alert(\`Export failed: \${error.message}
+              alert(`Export failed: ${error.message}
 
-Try taking a screenshot instead.\`);
+Try taking a screenshot instead.`);
             }
           };
 
@@ -278,176 +281,152 @@ Try taking a screenshot instead.\`);
             const workingGeniuses = topTwo.filter(item => item.percentage >= 70);
             const competencies = topTwo.filter(item => item.percentage >= 50 && item.percentage < 70);
 
-            return (
-              <div className="max-w-4xl mx-auto p-6 bg-white">
-                <div ref={resultsRef} className="results-content">
-                  <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2">Your Working Geniuses Results</h1>
-                    <p className="text-gray-600">Based on your responses, here's your unique working genius profile:</p>
-                  </div>
-
-                  <div className="space-y-6">
-                    {workingGeniuses.length > 0 && (
-                      <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
-                        <h2 className="text-xl font-bold text-green-800 mb-3">🌟 Your Working Geniuses (70%+)</h2>
-                        {workingGeniuses.map(item => (
-                          <div key={item.category} className="mb-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <h3 className="font-semibold text-green-700">{item.category}</h3>
-                              <span className="text-green-600 font-bold">{item.percentage}%</span>
-                            </div>
-                            <p className="text-green-600 text-sm">{getCategoryDescription(item.category)}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {competencies.length > 0 && (
-                      <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-                        <h2 className="text-xl font-bold text-blue-800 mb-3">💪 Your Working Competencies (50-69%)</h2>
-                        {competencies.map(item => (
-                          <div key={item.category} className="mb-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <h3 className="font-semibold text-blue-700">{item.category}</h3>
-                              <span className="text-blue-600 font-bold">{item.percentage}%</span>
-                            </div>
-                            <p className="text-blue-600 text-sm">{getCategoryDescription(item.category)}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="bg-gray-50 p-6 rounded-lg">
-                      <h2 className="text-xl font-bold text-gray-800 mb-3">📊 Complete Results</h2>
-                      <div className="space-y-3">
-                        {showResults.percentages.map(item => (
-                          <div key={item.category} className="flex items-center">
-                            <div className="w-32 text-sm font-medium text-gray-700">{item.category}</div>
-                            <div className="flex-1 mx-4">
-                              <div className="w-full bg-gray-200 rounded-full h-4">
-                                <div 
-                                  className={\`h-4 rounded-full \${
-                                    item.percentage >= 70 ? 'bg-green-500' : 
-                                    item.percentage >= 50 ? 'bg-blue-500' : 'bg-gray-400'
-                                  }\`}
-                                  style={{ width: \`\${item.percentage}%\` }}
-                                ></div>
-                              </div>
-                            </div>
-                            <div className="w-12 text-sm font-bold text-gray-700">{item.percentage}%</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-500">
-                      <h2 className="text-xl font-bold text-yellow-800 mb-3">💡 Understanding Your Results</h2>
-                      <div className="text-yellow-700 space-y-2 text-sm">
-                        <p><strong>Working Geniuses (70%+):</strong> These are your natural strengths that energize you. You should spend most of your time in these areas.</p>
-                        <p><strong>Working Competencies (50-69%):</strong> You can do these well but they don't energize you as much. Use these to support your geniuses.</p>
-                        <p><strong>Working Frustrations (below 50%):</strong> These areas drain your energy. Try to minimize time spent here or partner with others who have these as geniuses.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-3 mt-8 no-print">
-                  <button 
-                    onClick={exportToPDF}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
-                  >
-                    📄 Export PDF
-                  </button>
-                  <button 
-                    onClick={() => exportToImage('png')}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                  >
-                    🖼️ Export PNG
-                  </button>
-                  <button 
-                    onClick={() => exportToImage('jpeg')}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-                  >
-                    📸 Export JPEG
-                  </button>
-                  <button 
-                    onClick={resetQuiz}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    🔄 Take Quiz Again
-                  </button>
-                </div>
-              </div>
+            return React.createElement('div', { className: "max-w-4xl mx-auto p-6 bg-white" },
+              React.createElement('div', { ref: resultsRef, className: "results-content" },
+                React.createElement('div', { className: "text-center mb-8" },
+                  React.createElement('h1', { className: "text-3xl font-bold text-gray-800 mb-2" }, "Your Working Geniuses Results"),
+                  React.createElement('p', { className: "text-gray-600" }, "Based on your responses, here's your unique working genius profile:")
+                ),
+                React.createElement('div', { className: "space-y-6" },
+                  workingGeniuses.length > 0 && React.createElement('div', { className: "bg-green-50 p-6 rounded-lg border-l-4 border-green-500" },
+                    React.createElement('h2', { className: "text-xl font-bold text-green-800 mb-3" }, "🌟 Your Working Geniuses (70%+)"),
+                    workingGeniuses.map(item => 
+                      React.createElement('div', { key: item.category, className: "mb-4" },
+                        React.createElement('div', { className: "flex justify-between items-center mb-2" },
+                          React.createElement('h3', { className: "font-semibold text-green-700" }, item.category),
+                          React.createElement('span', { className: "text-green-600 font-bold" }, item.percentage + "%")
+                        ),
+                        React.createElement('p', { className: "text-green-600 text-sm" }, getCategoryDescription(item.category))
+                      )
+                    )
+                  ),
+                  competencies.length > 0 && React.createElement('div', { className: "bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500" },
+                    React.createElement('h2', { className: "text-xl font-bold text-blue-800 mb-3" }, "💪 Your Working Competencies (50-69%)"),
+                    competencies.map(item => 
+                      React.createElement('div', { key: item.category, className: "mb-4" },
+                        React.createElement('div', { className: "flex justify-between items-center mb-2" },
+                          React.createElement('h3', { className: "font-semibold text-blue-700" }, item.category),
+                          React.createElement('span', { className: "text-blue-600 font-bold" }, item.percentage + "%")
+                        ),
+                        React.createElement('p', { className: "text-blue-600 text-sm" }, getCategoryDescription(item.category))
+                      )
+                    )
+                  ),
+                  React.createElement('div', { className: "bg-gray-50 p-6 rounded-lg" },
+                    React.createElement('h2', { className: "text-xl font-bold text-gray-800 mb-3" }, "📊 Complete Results"),
+                    React.createElement('div', { className: "space-y-3" },
+                      showResults.percentages.map(item => 
+                        React.createElement('div', { key: item.category, className: "flex items-center" },
+                          React.createElement('div', { className: "w-32 text-sm font-medium text-gray-700" }, item.category),
+                          React.createElement('div', { className: "flex-1 mx-4" },
+                            React.createElement('div', { className: "w-full bg-gray-200 rounded-full h-4" },
+                              React.createElement('div', { 
+                                className: `h-4 rounded-full ${item.percentage >= 70 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-blue-500' : 'bg-gray-400'}`,
+                                style: { width: item.percentage + "%" }
+                              })
+                            )
+                          ),
+                          React.createElement('div', { className: "w-12 text-sm font-bold text-gray-700" }, item.percentage + "%")
+                        )
+                      )
+                    )
+                  ),
+                  React.createElement('div', { className: "bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-500" },
+                    React.createElement('h2', { className: "text-xl font-bold text-yellow-800 mb-3" }, "💡 Understanding Your Results"),
+                    React.createElement('div', { className: "text-yellow-700 space-y-2 text-sm" },
+                      React.createElement('p', null,
+                        React.createElement('strong', null, "Working Geniuses (70%+):"),
+                        " These are your natural strengths that energize you. You should spend most of your time in these areas."
+                      ),
+                      React.createElement('p', null,
+                        React.createElement('strong', null, "Working Competencies (50-69%):"),
+                        " You can do these well but they don't energize you as much. Use these to support your geniuses."
+                      ),
+                      React.createElement('p', null,
+                        React.createElement('strong', null, "Working Frustrations (below 50%):"),
+                        " These areas drain your energy. Try to minimize time spent here or partner with others who have these as geniuses."
+                      )
+                    )
+                  )
+                )
+              ),
+              React.createElement('div', { className: "flex flex-wrap justify-center gap-3 mt-8 no-print" },
+                React.createElement('button', { 
+                  onClick: exportToPDF,
+                  className: "bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                }, "📄 Export PDF"),
+                React.createElement('button', { 
+                  onClick: () => exportToImage('png'),
+                  className: "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                }, "🖼️ Export PNG"),
+                React.createElement('button', { 
+                  onClick: () => exportToImage('jpeg'),
+                  className: "bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                }, "📸 Export JPEG"),
+                React.createElement('button', { 
+                  onClick: resetQuiz,
+                  className: "bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                }, "🔄 Take Quiz Again")
+              )
             );
           }
 
           const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-          return (
-            <div className="max-w-2xl mx-auto p-6 bg-white min-h-screen">
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-2xl font-bold text-gray-800">The 6 Working Geniuses Assessment</h1>
-                  <span className="text-sm text-gray-600">
-                    {currentQuestion + 1} of {questions.length}
-                  </span>
-                </div>
-                
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: \`\${progress}%\` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-lg mb-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                  {questions[currentQuestion].text}
-                </h2>
-                
-                <div className="space-y-3">
-                  {answerOptions.map((option) => (
-                    <label 
-                      key={option.value} 
-                      className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-white transition-colors"
-                    >
-                      <input
-                        type="radio"
-                        name="answer"
-                        value={option.value}
-                        checked={answers[currentQuestion] === option.value}
-                        onChange={() => handleAnswer(option.value)}
-                        className="mr-3"
-                      />
-                      <span className="text-gray-700">{option.text}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex justify-between">
-                <button
-                  onClick={prevQuestion}
-                  disabled={currentQuestion === 0}
-                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Previous
-                </button>
-                
-                <button
-                  onClick={nextQuestion}
-                  disabled={answers[currentQuestion] === undefined}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {currentQuestion === questions.length - 1 ? 'Get Results' : 'Next'}
-                </button>
-              </div>
-            </div>
+          return React.createElement('div', { className: "max-w-2xl mx-auto p-6 bg-white min-h-screen" },
+            React.createElement('div', { className: "mb-8" },
+              React.createElement('div', { className: "flex justify-between items-center mb-4" },
+                React.createElement('h1', { className: "text-2xl font-bold text-gray-800" }, "The 6 Working Geniuses Assessment"),
+                React.createElement('span', { className: "text-sm text-gray-600" }, 
+                  (currentQuestion + 1) + " of " + questions.length
+                )
+              ),
+              React.createElement('div', { className: "w-full bg-gray-200 rounded-full h-2" },
+                React.createElement('div', { 
+                  className: "bg-blue-600 h-2 rounded-full transition-all duration-300",
+                  style: { width: progress + "%" }
+                })
+              )
+            ),
+            React.createElement('div', { className: "bg-gray-50 p-6 rounded-lg mb-6" },
+              React.createElement('h2', { className: "text-lg font-semibold text-gray-800 mb-4" },
+                questions[currentQuestion].text
+              ),
+              React.createElement('div', { className: "space-y-3" },
+                answerOptions.map((option) => 
+                  React.createElement('label', { 
+                    key: option.value, 
+                    className: "flex items-center p-3 border rounded-lg cursor-pointer hover:bg-white transition-colors"
+                  },
+                    React.createElement('input', {
+                      type: "radio",
+                      name: "answer",
+                      value: option.value,
+                      checked: answers[currentQuestion] === option.value,
+                      onChange: () => handleAnswer(option.value),
+                      className: "mr-3"
+                    }),
+                    React.createElement('span', { className: "text-gray-700" }, option.text)
+                  )
+                )
+              )
+            ),
+            React.createElement('div', { className: "flex justify-between" },
+              React.createElement('button', {
+                onClick: prevQuestion,
+                disabled: currentQuestion === 0,
+                className: "px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              }, "Previous"),
+              React.createElement('button', {
+                onClick: nextQuestion,
+                disabled: answers[currentQuestion] === undefined,
+                className: "px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              }, currentQuestion === questions.length - 1 ? 'Get Results' : 'Next')
+            )
           );
         };
 
-        ReactDOM.render(<WorkingGeniusesQuiz />, document.getElementById('root'));
+        ReactDOM.render(React.createElement(WorkingGeniusesQuiz), document.getElementById('root'));
     </script>
 </body>
 </html>
