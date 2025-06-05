@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Working Geniuses Assessment</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            overflow-x: hidden;
+        }
+        #root {
+            min-height: 100vh;
+            padding: 8px;
+        }
+        .telegram-optimized {
+            max-width: 100%;
+            margin: 0;
+            padding: 0 8px;
+        }
+        .question-card {
+            background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .answer-option {
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .answer-option:hover {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+        .answer-option.selected {
+            background-color: var(--tg-theme-button-color, #007AFF);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #007AFF);
+        }
+        .btn-primary {
+            background-color: var(--tg-theme-button-color, #007AFF);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .progress-bar {
+            height: 4px;
+            background-color: var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--tg-theme-button-color, #007AFF);
+            transition: width 0.3s ease;
+        }
+        .results-section {
+            background-color: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .genius-card {
+            background-color: #e8f5e8;
+            border-left: 4px solid #22c55e;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        .competency-card {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        .result-bar {
+            background-color: var(--tg-theme-hint-color, #e0e0e0);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        const TelegramWorkingGeniusesQuiz = () => {
+          const [currentQuestion, setCurrentQuestion] = useState(0);
+          const [answers, setAnswers] = useState({});
+          const [showResults, setShowResults] = useState(false);
+          const [isReady, setIsReady] = useState(false);
+
+          // Initialize Telegram WebApp
+          useEffect(() => {
+            if (window.Telegram?.WebApp) {
+              const tg = window.Telegram.WebApp;
+              tg.ready();
+              tg.expand();
+              tg.enableClosingConfirmation();
+              setIsReady(true);
+            } else {
+              setIsReady(true); // Fallback for testing outside Telegram
+            }
+          }, []);
+
+          const questions = [
+            { id: 1, text: "I have extremely high standards of precision and quality.", category: "TENACITY" },
+            { id: 2, text: "I have a gift for rallying people around a plan or idea, and inspiring them to take action.", category: "GALVANIZING" },
+            { id: 3, text: "I am comfortable sitting and contemplating the meaning of things longer than most others are.", category: "WONDER" },
+            { id: 4, text: "I can't help but come up with new and original ideas, even when it's not necessary.", category: "INVENTION" },
+            { id: 5, text: "I get more satisfaction and fulfillment than most people from seeing a project through to its finish.", category: "TENACITY" },
+            { id: 6, text: "People who know me would say I naturally respond to the needs of others, and on their terms.", category: "ENABLEMENT" },
+            { id: 7, text: "Others say I have a knack for convincing people to get involved in and support projects and ideas.", category: "GALVANIZING" },
+            { id: 8, text: "People say I can't stop innovating or proposing new ideas.", category: "INVENTION" },
+            { id: 9, text: "I am much more capable than most people in using my gut instincts when there is little data or information available.", category: "DISCERNMENT" },
+            { id: 10, text: "I am particularly bothered by seeing unmet potential in people or in my environment.", category: "ENABLEMENT" },
+            { id: 11, text: "Compared to others, I want the tasks that I work on to have clearly defined standards and outcomes.", category: "TENACITY" },
+            { id: 12, text: "I find helping people to be more deeply fulfilling than others do.", category: "ENABLEMENT" },
+            { id: 13, text: "I often start thinking about my next new idea before my last one has been fully developed.", category: "INVENTION" },
+            { id: 14, text: "People say that I have a rare talent for providing uniquely insightful advice and perspective.", category: "DISCERNMENT" },
+            { id: 15, text: "I can't help but prod and convince others to do something that I believe in or enjoy.", category: "GALVANIZING" },
+            { id: 16, text: "Others would say I am relentless in my attention to detail and completion of goals.", category: "TENACITY" },
+            { id: 17, text: "I spend more time than most people reflecting on and contemplating problems in the world around me.", category: "WONDER" },
+            { id: 18, text: "Others would say I have inexplicably better instincts and intuition than most people.", category: "DISCERNMENT" },
+            { id: 19, text: "I get energy when I have to create something new out of nothing.", category: "INVENTION" },
+            { id: 20, text: "Compared to most others, I am an exceedingly responsive and helpful person.", category: "ENABLEMENT" },
+            { id: 21, text: "Others would say I quickly and enthusiastically rally people around new ideas.", category: "GALVANIZING" },
+            { id: 22, text: "I rarely miss a deadline or target and couldn't imagine letting it happen.", category: "TENACITY" },
+            { id: 23, text: "I have a unique and undeniable ability to identify the underlying essence of any situation or challenge.", category: "DISCERNMENT" },
+            { id: 24, text: "I can't help but contemplate opportunities longer than most others would.", category: "WONDER" },
+            { id: 25, text: "Service and hospitality are a big part of my identity.", category: "ENABLEMENT" },
+            { id: 26, text: "Others consider me to be an extremely innovative person.", category: "INVENTION" },
+            { id: 27, text: "More than most people, I really enjoy getting others excited about a new idea or possibility.", category: "GALVANIZING" },
+            { id: 28, text: "I am extremely gifted at seeing how emotional factors must be integrated into decisions and situations.", category: "DISCERNMENT" },
+            { id: 29, text: "I can't help but empathize with people and support them in whatever they need.", category: "ENABLEMENT" },
+            { id: 30, text: "I enjoy having the freedom to create something new rather than having to tweak or edit something that has already been created.", category: "INVENTION" },
+            { id: 31, text: "People who know me well would say that I often get lost in my own thoughts.", category: "WONDER" },
+            { id: 32, text: "Compared to most people, I really enjoy driving a project or task through to final completion.", category: "TENACITY" },
+            { id: 33, text: "Compared to most others, I'm good at recruiting people to get involved and pushing them to start moving.", category: "GALVANIZING" },
+            { id: 34, text: "People say that I have an uncanny ability to assess or evaluate an idea, even without extensive detail or information.", category: "DISCERNMENT" },
+            { id: 35, text: "I find myself asking why things are the way they are more than most others do.", category: "WONDER" },
+            { id: 36, text: "I feel like I am the first person that people ask to volunteer because they know I will almost always say yes.", category: "ENABLEMENT" },
+            { id: 37, text: "Being an original and creative thinker is a big part of my identity.", category: "INVENTION" },
+            { id: 38, text: "When momentum and progress slow down, I enjoy being the one to reenergize people to push forward.", category: "GALVANIZING" },
+            { id: 39, text: "I am uniquely gifted at recognizing subtle nuances, trends and patterns that most others miss.", category: "DISCERNMENT" },
+            { id: 40, text: "I get energy from having a list of specific tasks in front of me.", category: "TENACITY" },
+            { id: 41, text: "I can't help but get lost in pondering the bigger picture of things.", category: "WONDER" },
+            { id: 42, text: "I naturally and easily encourage others in whatever excites them.", category: "ENABLEMENT" }
+          ];
+
+          const answerOptions = [
+            { value: 0, text: "Definitely not", emoji: "❌" },
+            { value: 1, text: "Sometimes", emoji: "🤔" },
+            { value: 2, text: "Definitely yes", emoji: "✅" }
+          ];
+
+          const handleAnswer = (value) => {
+            setAnswers({ ...answers, [currentQuestion]: value });
+          };
+
+          const nextQuestion = () => {
+            if (currentQuestion < questions.length - 1) {
+              setCurrentQuestion(currentQuestion + 1);
+            } else {
+              calculateResults();
+            }
+          };
+
+          const prevQuestion = () => {
+            if (currentQuestion > 0) {
+              setCurrentQuestion(currentQuestion - 1);
+            }
+          };
+
+          const calculateResults = () => {
+            const scores = {
+              WONDER: 0,
+              INVENTION: 0,
+              DISCERNMENT: 0,
+              GALVANIZING: 0,
+              ENABLEMENT: 0,
+              TENACITY: 0
+            };
+
+            questions.forEach((question, index) => {
+              const answer = answers[index] || 0;
+              scores[question.category] += answer;
+            });
+
+            const maxPossibleScore = {
+              WONDER: 6 * 2,
+              INVENTION: 7 * 2,
+              DISCERNMENT: 7 * 2,
+              GALVANIZING: 7 * 2,
+              ENABLEMENT: 8 * 2,
+              TENACITY: 7 * 2
+            };
+
+            const percentages = Object.entries(scores).map(([category, score]) => ({
+              category,
+              score,
+              percentage: Math.round((score / maxPossibleScore[category]) * 100)
+            })).sort((a, b) => b.percentage - a.percentage);
+
+            setShowResults({ scores, percentages });
+
+            // Send results to Telegram
+            if (window.Telegram?.WebApp) {
+              const tg = window.Telegram.WebApp;
+              const topResult = percentages[0];
+              tg.sendData(JSON.stringify({
+                type: 'assessment_completed',
+                topGenius: topResult.category,
+                percentage: topResult.percentage,
+                allResults: percentages
+              }));
+            }
+          };
+
+          const shareResults = () => {
+            if (window.Telegram?.WebApp) {
+              const tg = window.Telegram.WebApp;
+              const topResult = showResults.percentages[0];
+              const shareText = `🧠 I just discovered my Working Genius!\n\nMy top strength: ${topResult.category} (${topResult.percentage}%)\n\nTake the assessment yourself:`;
+              tg.switchInlineQuery(shareText, ['users', 'groups']);
+            }
+          };
+
+          const resetQuiz = () => {
+            setCurrentQuestion(0);
+            setAnswers({});
+            setShowResults(false);
+          };
+
+          const getCategoryDescription = (category) => {
+            const descriptions = {
+              WONDER: "🤔 You excel at pondering, questioning, and contemplating the bigger picture.",
+              INVENTION: "💡 You're a natural creator and innovator, constantly generating new ideas.",
+              DISCERNMENT: "🎯 You have exceptional intuition and judgment for evaluating situations.",
+              GALVANIZING: "⚡ You're gifted at rallying and energizing others around ideas.",
+              ENABLEMENT: "🤝 You excel at helping, supporting, and responding to others' needs.",
+              TENACITY: "✅ You're driven to push projects through to completion with high standards."
+            };
+            return descriptions[category];
+          };
+
+          const getCategoryEmoji = (category) => {
+            const emojis = {
+              WONDER: "🤔",
+              INVENTION: "💡",
+              DISCERNMENT: "🎯",
+              GALVANIZING: "⚡",
+              ENABLEMENT: "🤝",
+              TENACITY: "✅"
+            };
+            return emojis[category];
+          };
+
+          if (!isReady) {
+            return React.createElement('div', { className: "telegram-optimized flex items-center justify-center min-h-screen" },
+              React.createElement('div', { className: "text-center" },
+                React.createElement('div', { className: "text-2xl mb-4" }, "🧠"),
+                React.createElement('p', null, "Loading assessment...")
+              )
+            );
+          }
+
+          if (showResults) {
+            const topTwo = showResults.percentages.slice(0, 2);
+            const workingGeniuses = topTwo.filter(item => item.percentage >= 70);
+            const competencies = topTwo.filter(item => item.percentage >= 50 && item.percentage < 70);
+
+            return React.createElement('div', { className: "telegram-optimized" },
+              React.createElement('div', { className: "text-center mb-6" },
+                React.createElement('h1', { className: "text-2xl font-bold mb-2" }, "🧠 Your Working Geniuses"),
+                React.createElement('p', { className: "text-sm opacity-80" }, "Discover your natural strengths")
+              ),
+
+              workingGeniuses.length > 0 && React.createElement('div', { className: "genius-card" },
+                React.createElement('h2', { className: "text-lg font-bold mb-3 text-green-800" }, "🌟 Your Working Geniuses"),
+                workingGeniuses.map(item => 
+                  React.createElement('div', { key: item.category, className: "mb-4" },
+                    React.createElement('div', { className: "flex justify-between items-center mb-2" },
+                      React.createElement('span', { className: "font-semibold" }, 
+                        getCategoryEmoji(item.category) + " " + item.category
+                      ),
+                      React.createElement('span', { className: "font-bold text-green-600" }, item.percentage + "%")
+                    ),
+                    React.createElement('p', { className: "text-sm text-green-700" }, getCategoryDescription(item.category))
+                  )
+                )
+              ),
+
+              competencies.length > 0 && React.createElement('div', { className: "competency-card" },
+                React.createElement('h2', { className: "text-lg font-bold mb-3 text-blue-800" }, "💪 Your Competencies"),
+                competencies.map(item => 
+                  React.createElement('div', { key: item.category, className: "mb-4" },
+                    React.createElement('div', { className: "flex justify-between items-center mb-2" },
+                      React.createElement('span', { className: "font-semibold" }, 
+                        getCategoryEmoji(item.category) + " " + item.category
+                      ),
+                      React.createElement('span', { className: "font-bold text-blue-600" }, item.percentage + "%")
+                    ),
+                    React.createElement('p', { className: "text-sm text-blue-700" }, getCategoryDescription(item.category))
+                  )
+                )
+              ),
+
+              React.createElement('div', { className: "results-section" },
+                React.createElement('h2', { className: "text-lg font-bold mb-3" }, "📊 All Results"),
+                showResults.percentages.map(item => 
+                  React.createElement('div', { key: item.category, className: "mb-3" },
+                    React.createElement('div', { className: "flex justify-between items-center mb-1" },
+                      React.createElement('span', { className: "text-sm font-medium" }, 
+                        getCategoryEmoji(item.category) + " " + item.category
+                      ),
+                      React.createElement('span', { className: "text-sm font-bold" }, item.percentage + "%")
+                    ),
+                    React.createElement('div', { className: "result-bar" },
+                      React.createElement('div', { 
+                        className: item.percentage >= 70 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-blue-500' : 'bg-gray-400',
+                        style: { width: item.percentage + "%", height: "100%", borderRadius: "6px" }
+                      })
+                    )
+                  )
+                )
+              ),
+
+              React.createElement('div', { className: "flex flex-col gap-3 mt-6" },
+                React.createElement('button', { 
+                  onClick: shareResults,
+                  className: "btn-primary w-full"
+                }, "📤 Share Results"),
+                React.createElement('button', { 
+                  onClick: resetQuiz,
+                  className: "btn-secondary w-full"
+                }, "🔄 Take Again")
+              )
+            );
+          }
+
+          const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+          return React.createElement('div', { className: "telegram-optimized" },
+            React.createElement('div', { className: "mb-6" },
+              React.createElement('div', { className: "flex justify-between items-center mb-2" },
+                React.createElement('h1', { className: "text-xl font-bold" }, "Working Geniuses"),
+                React.createElement('span', { className: "text-sm opacity-70" }, 
+                  (currentQuestion + 1) + " / " + questions.length
+                )
+              ),
+              React.createElement('div', { className: "progress-bar" },
+                React.createElement('div', { 
+                  className: "progress-fill",
+                  style: { width: progress + "%" }
+                })
+              )
+            ),
+
+            React.createElement('div', { className: "question-card" },
+              React.createElement('h2', { className: "text-lg font-semibold mb-4" },
+                questions[currentQuestion].text
+              ),
+              React.createElement('div', { className: "space-y-2" },
+                answerOptions.map((option) => 
+                  React.createElement('div', { 
+                    key: option.value,
+                    className: `answer-option ${answers[currentQuestion] === option.value ? 'selected' : ''}`,
+                    onClick: () => handleAnswer(option.value)
+                  },
+                    React.createElement('div', { className: "flex items-center" },
+                      React.createElement('span', { className: "text-lg mr-3" }, option.emoji),
+                      React.createElement('span', null, option.text)
+                    )
+                  )
+                )
+              )
+            ),
+
+            React.createElement('div', { className: "flex justify-between mt-6" },
+              React.createElement('button', {
+                onClick: prevQuestion,
+                disabled: currentQuestion === 0,
+                className: "btn-secondary"
+              }, "← Previous"),
+              React.createElement('button', {
+                onClick: nextQuestion,
+                disabled: answers[currentQuestion] === undefined,
+                className: "btn-primary"
+              }, currentQuestion === questions.length - 1 ? '🎯 Get Results' : 'Next →')
+            )
+          );
+        };
+
+        ReactDOM.render(React.createElement(TelegramWorkingGeniusesQuiz), document.getElementById('root'));
+    </script>
+</body>
+</html>
